@@ -1,18 +1,14 @@
-import pandas as pd
+# app/train.py
+import os
+import json
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-import json
+import pandas as pd
+from app.preprocess import preprocess
 
-def preprocess(df):
-    df = df.drop(columns=["PassengerId", "Name", "Ticket", "Cabin"])
-    df["Age"] = df["Age"].fillna(df["Age"].median())
-    df["Embarked"] = df["Embarked"].fillna("S")
-
-    df["Sex"] = df["Sex"].map({"male": 0, "female": 1})
-    df["Embarked"] = df["Embarked"].map({"S": 0, "C": 1, "Q": 2})
-
-    return df
+EPOCHS = int(os.getenv("EPOCHS", 50))
+BATCH_SIZE = int(os.getenv("BATCH_SIZE", 16))
 
 def train():
     df = pd.read_csv("data/titanic.csv")
@@ -27,55 +23,70 @@ def train():
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dropout(0.3),
-        
+
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dropout(0.3),
-        
+
         tf.keras.layers.Dense(32, activation='relu'),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
 
     model.compile(
-        optimizer='adam',
+        optimizer=tf.keras.optimizers.Adam(0.001),
         loss='binary_crossentropy',
         metrics=['accuracy']
     )
 
+    log_dir = "logs"
+    tensorboard_cb = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
+
     history = model.fit(
         X_train, y_train,
-        epochs=50,
         validation_data=(X_test, y_test),
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        callbacks=[tensorboard_cb],
         verbose=1
     )
 
-    # metrics save
-    final_acc = history.history["val_accuracy"][-1]
+    # Save full history
+    metrics = {
+        "loss": history.history["loss"],
+        "val_loss": history.history["val_loss"],
+        "accuracy": history.history["accuracy"],
+        "val_accuracy": history.history["val_accuracy"]
+    }
 
     with open("metrics.json", "w") as f:
-        json.dump({
-            "loss": history.history["loss"],
-            "val_loss": history.history["val_loss"],
-            "accuracy": history.history["accuracy"],
-            "val_accuracy": history.history["val_accuracy"]
-        }, f)
-    
-    with open("metrics.json") as f:
-        metrics = json.load(f)
-    
-    plt.figure()
+        json.dump(metrics, f)
 
-    plt.subplot(1, 2, 1)
-    plt.plot(metrics["loss"], label="train_loss")
-    plt.plot(metrics["val_loss"], label="val_loss")
+    # Plot metrics from JSON
+    plt.figure(figsize=(12,5))
+
+    plt.subplot(1,2,1)
+    plt.plot(metrics["loss"], label="train_loss", marker='o')
+    plt.plot(metrics["val_loss"], label="val_loss", marker='x')
+    plt.title("Loss per Epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
     plt.legend()
-    
-    plt.subplot(1, 2, 2)
-    plt.plot(metrics["accuracy"], label="train_acc")
-    plt.plot(metrics["val_accuracy"], label="val_acc")
+    plt.grid(True)
+
+    plt.subplot(1,2,2)
+    plt.plot(metrics["accuracy"], label="train_acc", marker='o')
+    plt.plot(metrics["val_accuracy"], label="val_acc", marker='x')
+    plt.title("Accuracy per Epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
     plt.legend()
-    
+    plt.grid(True)
+
+    plt.tight_layout()
     plt.savefig("metrics.png")
+
+    # Save model
+    model.save("app/model_tf")
 
 if __name__ == "__main__":
     train()
