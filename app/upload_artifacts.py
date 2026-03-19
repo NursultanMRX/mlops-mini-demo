@@ -8,7 +8,8 @@ gdrive_json = os.environ["GDRIVE_KEY"]
 with open("service_account.json", "w") as f:
     f.write(gdrive_json)
 
-SCOPES = ['https://www.googleapis.com/auth/drive.file']
+# To'liq ruxsat beruvchi scope (bu muhim!)
+SCOPES = ['https://www.googleapis.com/auth/drive']
 creds = service_account.Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
 service = build('drive', 'v3', credentials=creds)
 
