@@ -1,5 +1,4 @@
-# .github/workflows/train.yml
-name: Train NN + Save Artifacts
+name: Train Adult Income NN Pipeline
 
 on:
   push:
@@ -10,29 +9,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # 1️⃣ Checkout repo
+      - uses: actions/checkout@v3
 
+      # 2️⃣ Setup Python
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      - name: Install deps
-        run: pip install -r requirements.txt
-
-      - name: Run training
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
         run: |
-          export PYTHONPATH=$PYTHONPATH:$(pwd)
-          python app/train.py
-        env:
-          EPOCHS: 50
-          BATCH_SIZE: 16
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
+      # 4️⃣ Download data from Google Drive
+      - name: Download data
+        run: |
+          python download_data.py
+        env:
+          GDRIVE_KEY: ${{ secrets.GDRIVE_KEY }}
+
+      # 5️⃣ Hyperparameter tuning (Optuna small trials)
+      - name: Run Optuna tuning
+        run: |
+          python app/train_tune.py
+
+      # 6️⃣ Full training with best parameters
+      - name: Run final training
+        run: |
+          python app/train_final.py
+
+      # 7️⃣ Upload artifacts
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: training-artifacts
+          name: adult_income_artifacts
           path: |
-            metrics.json
-            metrics.png
-            app/model_tf
+            best_params.json
+            app/final_model.keras

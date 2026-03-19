@@ -1,12 +1,22 @@
 # app/preprocess.py
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 def preprocess(df):
-    df = df.drop(columns=["PassengerId", "Name", "Ticket", "Cabin"])
-    df["Age"] = df["Age"].fillna(df["Age"].median())
-    df["Embarked"] = df["Embarked"].fillna("S")
-
-    df["Sex"] = df["Sex"].map({"male": 0, "female": 1})
-    df["Embarked"] = df["Embarked"].map({"S": 0, "C": 1, "Q": 2})
-
-    return df
+    # Categorical columns
+    cat_cols = ["workclass","education","marital-status","occupation",
+                "relationship","race","gender","native-country","salary"]
+    
+    for col in cat_cols:
+        df[col] = df[col].fillna("Unknown")
+        df[col] = LabelEncoder().fit_transform(df[col])
+    
+    # Fill missing numerical values if any
+    num_cols = ["age","fnlwgt","education-num","capital-gain","capital-loss","hours-per-week"]
+    for col in num_cols:
+        df[col] = df[col].fillna(df[col].median())
+    
+    X = df.drop("salary", axis=1).values
+    y = df["salary"].values
+    
+    return X, y
