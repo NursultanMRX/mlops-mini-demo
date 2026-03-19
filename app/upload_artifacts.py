@@ -8,40 +8,49 @@ gdrive_json = os.environ["GDRIVE_KEY"]
 with open("service_account.json", "w") as f:
     f.write(gdrive_json)
 
-# To'liq ruxsat beruvchi scope (bu muhim!)
 SCOPES = ['https://www.googleapis.com/auth/drive']
 creds = service_account.Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
 service = build('drive', 'v3', credentials=creds)
 
-# 2. Yuklanishi kerak bo'lgan fayllar ro'yxati
-files_to_upload = [
-    "best_params.json",
-    "app/final_model.keras",
-    "metrics.png"
-]
-
-# 3. Google Drive'dagi papka ID si (O'zingizning papka ID'ingizni qo'ying)
-# Maslahat: Drive'da yangi papka oching va uning URL'idan ID ni oling
 FOLDER_ID = "1SxlXt4uulJpy7Eerx6YYb-_ilVe0uvQa"
+files_to_upload = ["best_params.json", "app/final_model.keras", "metrics.png"]
 
-def upload_file(file_path, folder_id):
-    file_name = os.path.basename(file_path)
-    file_metadata = {
-        'name': file_name,
-        'parents': [folder_id]
-    }
-    media = MediaFileUpload(file_path, resumable=True)
-    
+def upload_to_drive():
     try:
-        folder = service.files().get(fileId=FOLDER_ID, fields='name').execute()
-        print(f"Papka topildi va ulanish bor: {folder.get('name')}")
-    except Exception as e:
-        print(f"DIQQAT! Papkaga ulanishda xato: {e}")
-        exit(1) # Agar papka topilmasa, skriptni to'xtatish
+        # qaysi robot ishlayotganini aniq ekranga chiqaramiz
+        user_info = service.about().get(fields="user").execute()
+        bot_email = user_info['user']['emailAddress']
+        print(f"🤖 Hozir GitHub'da ishlayotgan robot: {bot_email}")
+        
+        # supportsAllDrives=True parametrini qo'shdik!
+        folder = service.files().get(
+            fileId=FOLDER_ID, 
+            fields='name', 
+            supportsAllDrives=True
+        ).execute()
+        print(f"✅ Papka topildi: {folder.get('name')}")
 
-# Yuklashni boshlash
-for file_p in files_to_upload:
-    if os.path.exists(file_p):
-        upload_file(file_p, FOLDER_ID)
-    else:
-        print(f"Xato: {file_p} topilmadi!")
+        # Fayllarni yuklash
+        for f_path in files_to_upload:
+            if os.path.exists(f_path):
+                file_name = os.path.basename(f_path)
+                file_metadata = {'name': file_name, 'parents': [FOLDER_ID]}
+                media = MediaFileUpload(f_path, resumable=True)
+                
+                # Bu yerga ham supportsAllDrives=True qo'shdik
+                file = service.files().create(
+                    body=file_metadata, 
+                    media_body=media, 
+                    fields='id, webViewLink',
+                    supportsAllDrives=True
+                ).execute()
+                print(f"🚀 Yuklandi: {file_name}")
+            else:
+                print(f"❌ Xato: {f_path} topilmadi!")
+
+    except Exception as e:
+        print(f"DIQQAT XATO: {e}")
+        print(f"\n🚨 ILTIMOS, Google Drive'da papkaga kirib, mana shu emailga ruxsat bering: {bot_email}")
+        exit(1)
+
+upload_to_drive()
