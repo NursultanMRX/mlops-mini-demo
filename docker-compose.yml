@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  mlops-demo:
+    container_name: mlops-demo
+    build: .
+    ports:
+      - "8001:8000"
+    restart: always
