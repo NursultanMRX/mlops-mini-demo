@@ -14,7 +14,7 @@ gauth.ServiceAuth()
 drive = GoogleDrive(gauth)
 
 # Google Drive file ID
-file_id = "GOOGLE_DRIVE_FILE_ID"  # Adult Income CSV file ID
+file_id = "1V0n8oCig8swFhr5mKA1moa4285_2DTol"  # Adult Income CSV file ID
 downloaded = drive.CreateFile({"id": file_id})
 os.makedirs("data", exist_ok=True)
 downloaded.GetContentFile("data/adult11.csv")
