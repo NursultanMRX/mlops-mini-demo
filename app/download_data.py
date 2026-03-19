@@ -1,21 +1,20 @@
-# download_data.py
-import os
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
+import os
 
-# GitHub Actions secret
+# JSON fayl GitHub Secret orqali
 gdrive_json = os.environ["GDRIVE_KEY"]
 with open("service_account.json", "w") as f:
     f.write(gdrive_json)
 
 gauth = GoogleAuth()
-gauth.ServiceAuthSettings = {"client_json_file": "service_account.json"}
-gauth.ServiceAuth()
+# To‘g‘ridan-to‘g‘ri Service Account key bilan autentifikatsiya
+gauth.LoadServiceAccountCredentials("service_account.json")
 drive = GoogleDrive(gauth)
 
-# Google Drive file ID
-file_id = "1lLaxBSyKS-eZHclBWeY24ollDPXM1PdB"  # Adult Income CSV file ID
-downloaded = drive.CreateFile({"id": file_id})
+# Masalan, file yuklash
+file_id = "1lLaxBSyKS-eZHclBWeY24ollDPXM1PdB"
+downloaded = drive.CreateFile({'id': file_id})
 os.makedirs("data", exist_ok=True)
 downloaded.GetContentFile("data/adult11.csv")
-print("Adult Income CSV downloaded successfully!")
+print("CSV downloaded successfully!")
