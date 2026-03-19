@@ -1,6 +1,6 @@
 # TensorFlow for neural networks
 tensorflow>=2.13
-
+tensorboard>=2.13
 # MLflow for experiment tracking
 mlflow>=2.7.0
 
