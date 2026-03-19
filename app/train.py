@@ -1,23 +1,38 @@
-from sklearn.datasets import load_iris
+import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-import joblib
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
 import json
+import joblib
 
 def train():
-    data = load_iris()
-    X, y = data.data, data.target
+    df = pd.read_csv("data/data.csv")
+
+    # example: last column = target
+    X = df.iloc[:, :-1]
+    y = df.iloc[:, -1]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
     model = RandomForestClassifier()
-    model.fit(X, y)
+    model.fit(X_train, y_train)
 
-    acc = model.score(X, y)
+    preds = model.predict(X_test)
+    acc = accuracy_score(y_test, preds)
 
     # save model
     joblib.dump(model, "app/model.pkl")
 
     # save metrics
+    metrics = {"accuracy": float(acc)}
     with open("metrics.json", "w") as f:
-        json.dump({"accuracy": acc}, f)
+        json.dump(metrics, f)
+
+    # plot (simple)
+    plt.figure()
+    plt.bar(["accuracy"], [acc])
+    plt.savefig("metrics.png")
 
 if __name__ == "__main__":
     train()

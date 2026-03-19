@@ -1,4 +1,4 @@
-name: Train and Commit
+name: Train + Report
 
 on:
   push:
@@ -6,10 +6,11 @@ on:
 
 jobs:
   train:
+    if: "!contains(github.event.head_commit.message, 'auto:')"
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write   # 🔥 MUHIM
+      contents: write
 
     steps:
       - uses: actions/checkout@v3
@@ -24,6 +25,6 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add metrics.json app/model.pkl
-          git commit -m "auto: update model + metrics" || echo "no changes"
+          git add metrics.json metrics.png app/model.pkl
+          git commit -m "auto: update metrics + model" || echo "no changes"
           git push
