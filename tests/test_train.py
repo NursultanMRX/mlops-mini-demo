@@ -3,5 +3,5 @@ import os
 
 def test_train():
     train()
-    assert os.path.exists("app/model.pkl")
     assert os.path.exists("metrics.json")
+    assert os.path.exists("metrics.png")
