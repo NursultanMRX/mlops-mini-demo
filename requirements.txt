@@ -1,4 +1,5 @@
 tensorflow>=2.13
+tensorboard
 pandas
 scikit-learn
 matplotlib
