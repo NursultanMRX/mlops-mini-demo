@@ -1,8 +1,6 @@
+tensorflow>=2.13
 pandas
 scikit-learn
 matplotlib
 joblib
-fastapi
-uvicorn
 pytest
-tensorflow
