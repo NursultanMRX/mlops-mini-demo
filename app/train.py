@@ -7,7 +7,7 @@ import json
 import joblib
 
 def train():
-    df = pd.read_csv("data/data.csv")
+    df = pd.read_csv("data/titanic.csv")
 
     # example: last column = target
     X = df.iloc[:, :-1]
