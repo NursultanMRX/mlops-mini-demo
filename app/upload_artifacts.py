@@ -31,9 +31,12 @@ def upload_file(file_path, folder_id):
     }
     media = MediaFileUpload(file_path, resumable=True)
     
-    # Eskisini o'chirib yangisini yuklash yoki shunchaki yuklash
-    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    print(f"Fayl yuklandi: {file_name} (ID: {file.get('id')})")
+    try:
+        folder = service.files().get(fileId=FOLDER_ID, fields='name').execute()
+        print(f"Papka topildi va ulanish bor: {folder.get('name')}")
+    except Exception as e:
+        print(f"DIQQAT! Papkaga ulanishda xato: {e}")
+        exit(1) # Agar papka topilmasa, skriptni to'xtatish
 
 # Yuklashni boshlash
 for file_p in files_to_upload:
