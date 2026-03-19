@@ -54,3 +54,4 @@ jobs:
           path: |
             best_params.json
             app/final_model.keras
+            metrics.png
