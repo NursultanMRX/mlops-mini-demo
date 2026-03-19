@@ -27,7 +27,8 @@ jobs:
       # 4️⃣ Download data from Google Drive
       - name: Download data
         run: |
-          python download_data.py
+          pip install pydrive2
+          python app/download_data.py
         env:
           GDRIVE_KEY: ${{ secrets.GDRIVE_KEY }}
 
