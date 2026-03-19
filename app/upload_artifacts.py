@@ -21,7 +21,7 @@ files_to_upload = [
 
 # 3. Google Drive'dagi papka ID si (O'zingizning papka ID'ingizni qo'ying)
 # Maslahat: Drive'da yangi papka oching va uning URL'idan ID ni oling
-FOLDER_ID = "1SxlXt4uulJpy7Eerx6YYb-_iIVe0uvQa" 
+FOLDER_ID = "1SxlXt4uulJpy7Eerx6YYb-_ilVe0uvQa"
 
 def upload_file(file_path, folder_id):
     file_name = os.path.basename(file_path)
