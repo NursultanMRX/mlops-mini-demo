@@ -1,4 +1,5 @@
-name: Train + Report
+# .github/workflows/train.yml
+name: Train NN + Save Artifacts
 
 on:
   push:
@@ -6,25 +7,32 @@ on:
 
 jobs:
   train:
-    if: "!contains(github.event.head_commit.message, 'auto:')"
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
       - name: Install deps
         run: pip install -r requirements.txt
 
       - name: Run training
-        run: python app/train.py
-
-      - name: Commit results
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-          git add metrics.json metrics.png app/model.pkl
-          git commit -m "auto: update metrics + model" || echo "no changes"
-          git push
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          python app/train.py
+        env:
+          EPOCHS: 50
+          BATCH_SIZE: 16
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-artifacts
+          path: |
+            metrics.json
+            metrics.png
+            app/model_tf
