@@ -25,19 +25,22 @@ def create_model(lr, dropout):
     return model
 
 def objective(trial):
-    lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
-    dropout = trial.suggest_float("dropout", 0.1, 0.5)
-    
-    model = create_model(lr, dropout)
-    history = model.fit(X_train, y_train, validation_data=(X_val, y_val),
-                        epochs=EPOCHS, batch_size=32, verbose=0)
-    
-    val_acc = history.history["val_accuracy"][-1]
-    
-    mlflow.log_params({"lr": lr, "dropout": dropout})
-    mlflow.log_metrics({"val_acc": val_acc})
-    
-    return val_acc
+    # MLflow uchun har bir trialga alohida sessiya (run) ochamiz
+    with mlflow.start_run(run_name=f"trial_{trial.number}"):
+        lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
+        dropout = trial.suggest_float("dropout", 0.1, 0.5)
+        
+        model = create_model(lr, dropout)
+        history = model.fit(X_train, y_train, validation_data=(X_val, y_val),
+                            epochs=EPOCHS, batch_size=32, verbose=0)
+        
+        val_acc = history.history["val_accuracy"][-1]
+        
+        # Endi param va metrikalar shu ochiq run ichiga yoziladi
+        mlflow.log_params({"lr": lr, "dropout": dropout})
+        mlflow.log_metrics({"val_acc": val_acc})
+        
+        return val_acc
 
 study = optuna.create_study(direction="maximize")
 study.optimize(objective, n_trials=5)
