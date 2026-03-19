@@ -1,18 +1,19 @@
-from pydrive2.auth import GoogleAuth
+from pydrive2.auth import ServiceAccountCredentials
 from pydrive2.drive import GoogleDrive
 import os
+import json
 
-# JSON fayl GitHub Secret orqali
+# GitHub Secret orqali JSON
 gdrive_json = os.environ["GDRIVE_KEY"]
 with open("service_account.json", "w") as f:
     f.write(gdrive_json)
 
-gauth = GoogleAuth()
-# To‘g‘ridan-to‘g‘ri Service Account key bilan autentifikatsiya
-gauth.LoadServiceAccountCredentials("service_account.json")
-drive = GoogleDrive(gauth)
+# Service Account Credentials
+scopes = ['https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scopes=scopes)
+drive = GoogleDrive(creds)
 
-# Masalan, file yuklash
+# File yuklash
 file_id = "1lLaxBSyKS-eZHclBWeY24ollDPXM1PdB"
 downloaded = drive.CreateFile({'id': file_id})
 os.makedirs("data", exist_ok=True)
