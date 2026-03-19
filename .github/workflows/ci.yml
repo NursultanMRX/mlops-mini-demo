@@ -25,7 +25,7 @@ jobs:
           export PYTHONPATH=$PYTHONPATH:$(pwd)
           python app/train.py
         env:
-          EPOCHS: 10
+          EPOCHS: 50
           BATCH_SIZE: 16
 
       - name: Upload artifacts
