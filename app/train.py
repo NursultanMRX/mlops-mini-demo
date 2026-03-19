@@ -46,14 +46,29 @@ def train():
     final_acc = history.history["val_accuracy"][-1]
 
     with open("metrics.json", "w") as f:
-        json.dump({"val_accuracy": float(final_acc)}, f)
-
-    # plot loss
+    json.dump({
+        "loss": history.history["loss"],
+        "val_loss": history.history["val_loss"],
+        "accuracy": history.history["accuracy"],
+        "val_accuracy": history.history["val_accuracy"]
+    }, f)
+    
+    with open("metrics.json") as f:
+        metrics = json.load(f)
+    
     plt.figure()
-    plt.plot(history.history["loss"], label="train_loss")
-    plt.plot(history.history["val_loss"], label="val_loss")
+
+    plt.subplot(1, 2, 1)
+    plt.plot(metrics["loss"], label="train_loss")
+    plt.plot(metrics["val_loss"], label="val_loss")
     plt.legend()
-    plt.savefig("loss.png")
+    
+    plt.subplot(1, 2, 2)
+    plt.plot(metrics["accuracy"], label="train_acc")
+    plt.plot(metrics["val_accuracy"], label="val_acc")
+    plt.legend()
+    
+    plt.savefig("metrics.png")
 
 if __name__ == "__main__":
     train()
