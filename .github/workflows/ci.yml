@@ -34,13 +34,17 @@ jobs:
 
       # 5️⃣ Hyperparameter tuning (Optuna small trials)
       - name: Run Optuna tuning
+        env:
+          PYTHONPATH: .
         run: |
-          python app/train_tune.py
+          python -m app.train_tune
 
       # 6️⃣ Full training with best parameters
       - name: Run final training
+        env:
+          PYTHONPATH: .
         run: |
-          python app/train_final.py
+          python -m app.train_final
 
       # 7️⃣ Upload artifacts
       - name: Upload artifacts
