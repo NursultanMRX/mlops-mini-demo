@@ -55,3 +55,11 @@ jobs:
             best_params.json
             app/final_model.keras
             metrics.png
+
+      # 8️⃣ Upload results to Google Drive (Persistent Storage)
+      - name: Push results to Google Drive
+        env:
+          PYTHONPATH: .
+          GDRIVE_KEY: ${{ secrets.GDRIVE_KEY }}
+        run: |
+          python -m app.upload_artifacts
