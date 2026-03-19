@@ -25,9 +25,10 @@ jobs:
           pip install -r requirements.txt
 
       # 4️⃣ Download data from Google Drive
-      - name: Download data
+      - name: Download data from Google Drive
         run: |
-          python download_data.py
+         pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+         python download_data.py
         env:
           GDRIVE_KEY: ${{ secrets.GDRIVE_KEY }}
 
