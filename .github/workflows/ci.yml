@@ -1,12 +1,15 @@
-name: CI/CD
+name: Train and Commit
 
 on:
   push:
     branches: [main]
 
 jobs:
-  test-deploy:
+  train:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # 🔥 MUHIM
 
     steps:
       - uses: actions/checkout@v3
@@ -14,16 +17,13 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt
 
-      - name: Run tests
-        run: pytest
+      - name: Run training
+        run: python app/train.py
 
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v0.1.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: root
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /root/mlops-demo
-            git pull
-            docker-compose up -d --build
+      - name: Commit results
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add metrics.json app/model.pkl
+          git commit -m "auto: update model + metrics" || echo "no changes"
+          git push
