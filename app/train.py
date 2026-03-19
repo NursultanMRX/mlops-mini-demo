@@ -46,12 +46,12 @@ def train():
     final_acc = history.history["val_accuracy"][-1]
 
     with open("metrics.json", "w") as f:
-    json.dump({
-        "loss": history.history["loss"],
-        "val_loss": history.history["val_loss"],
-        "accuracy": history.history["accuracy"],
-        "val_accuracy": history.history["val_accuracy"]
-    }, f)
+        json.dump({
+            "loss": history.history["loss"],
+            "val_loss": history.history["val_loss"],
+            "accuracy": history.history["accuracy"],
+            "val_accuracy": history.history["val_accuracy"]
+        }, f)
     
     with open("metrics.json") as f:
         metrics = json.load(f)
