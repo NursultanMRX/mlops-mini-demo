@@ -86,7 +86,7 @@ def train():
     plt.savefig("metrics.png")
 
     # Save model
-    model.save("app/model_tf")
+    model.save("app/model_tf.keras")
 
 if __name__ == "__main__":
     train()
