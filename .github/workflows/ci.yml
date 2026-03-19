@@ -28,7 +28,7 @@ jobs:
       - name: Download data from Google Drive
         run: |
          pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
-         python download_data.py
+         python app/download_data.py
         env:
           GDRIVE_KEY: ${{ secrets.GDRIVE_KEY }}
 
