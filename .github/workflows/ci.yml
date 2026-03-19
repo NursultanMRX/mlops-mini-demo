@@ -20,6 +20,13 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt
 
+      - name: Download data from Google Drive
+        run: |
+          pip install pydrive2
+          python download_data.py
+        env:
+          GDRIVE_KEY: ${{ secrets.GDRIVE_KEY }}
+
       - name: Run training
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
