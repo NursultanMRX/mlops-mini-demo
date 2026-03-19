@@ -1,21 +1,33 @@
-from pydrive2.auth import ServiceAccountCredentials
-from pydrive2.drive import GoogleDrive
 import os
-import json
+import io
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
 
-# GitHub Secret orqali JSON
+# 1. GitHub Secret'dan JSON'ni o'qib faylga yozish
 gdrive_json = os.environ["GDRIVE_KEY"]
 with open("service_account.json", "w") as f:
     f.write(gdrive_json)
 
-# Service Account Credentials
-scopes = ['https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scopes=scopes)
-drive = GoogleDrive(creds)
+# 2. Service Account bilan to'g'ridan-to'g'ri autentifikatsiya
+SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+creds = service_account.Credentials.from_service_account_file(
+    'service_account.json', scopes=SCOPES
+)
 
-# File yuklash
-file_id = "1lLaxBSyKS-eZHclBWeY24ollDPXM1PdB"
-downloaded = drive.CreateFile({'id': file_id})
+# 3. Drive API'ni ulash
+service = build('drive', 'v3', credentials=creds)
+
+# 4. Faylni yuklab olish
+file_id = "1lLaxBSyKS-eZHclBWeY24ollDPXM1PdB" # Faylingizning ID sini yozishni unutmang!
+request = service.files().get_media(fileId=file_id)
+
 os.makedirs("data", exist_ok=True)
-downloaded.GetContentFile("data/adult11.csv")
-print("CSV downloaded successfully!")
+with io.FileIO("data/adult11.csv", "wb") as fh:
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while not done:
+        status, done = downloader.next_chunk()
+        print(f"Yuklanmoqda... {int(status.progress() * 100)}%")
+
+print("Adult Income CSV muvaffaqiyatli yuklandi!")
